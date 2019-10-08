@@ -11,6 +11,9 @@ import cv2
 import numpy as np
 import time
 
+#text
+font = cv2.FONT_HERSHEY_SIMPLEX
+
 def ResizeWithAspectRatio(image, width=None, height=None, inter=cv2.INTER_AREA):
     dim = None
     (h, w) = image.shape[:2]
@@ -26,6 +29,23 @@ def ResizeWithAspectRatio(image, width=None, height=None, inter=cv2.INTER_AREA):
 
     return cv2.resize(image, dim, interpolation=inter)
 
+def displayLeft(left):
+    # Display the Left Eye
+    resized_left = ResizeWithAspectRatio(left, width = 640) #Resize by
+    lString = "Left"
+    cv2.putText(resized_left, lString, (0, 20), font, 0.8, (0, 255, 0), 2, cv2.LINE_AA)
+    cv2.imshow('Left Eye',resized_left)
+    # resized_frame = ResizeWithAspectRatio(frame, height = 480)
+
+
+def displayRight(right):
+    # Display the Right Eye
+    resized_right = ResizeWithAspectRatio(right, width = 640) #Resize by
+    rString = "Right"
+    cv2.putText(resized_right, rString, (0, 20), font, 0.8, (0, 255, 0), 2, cv2.LINE_AA)
+    cv2.imshow('Right Eye',resized_right)
+    # resized_frame = ResizeWithAspectRatio(frame, height = 480)
+
 
 #Operation a freame form Night Owel security stystem use OCR to find out time of
 #recording
@@ -39,8 +59,8 @@ def main():
     # If the input is the camera, pass 0 instead of the video file name
     cap = cv2.VideoCapture('SMI_Pupilometry_Test.mp4')
 
-    w = cap.get(cv2.CAP_PROP_FRAME_WIDTH)
-    h = cap.get(cv2.CAP_PROP_FRAME_HEIGHT)
+    w = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+    h = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
     fps = cap.get(cv2.CAP_PROP_FPS)
     fcount = cap.get(cv2.CAP_PROP_FRAME_COUNT)
     timestamp = time.clock()
@@ -61,10 +81,24 @@ def main():
 
       if ret == True:
 
-          getTime(frame,timestamp)
+          #getTime(frame,timestamp)
 
+          leftImage = frame[1:int(h/2),1:int(w/2)]
+          rightImage = frame[1:int(h/2),int(w/2+1):w]
+
+          displayLeft(leftImage)
+          displayRight(rightImage)
+
+          #Display Main
           resized_frame = ResizeWithAspectRatio(frame, width = 640) #Resize by
           # resized_frame = ResizeWithAspectRatio(frame, height = 480)
+
+          framePosition = cap.get(cv2.CAP_PROP_POS_FRAMES)
+          fpString = "Frame " + str(framePosition) + '/' + str(fcount)
+          cv2.putText(resized_frame, fpString, (230, 350), font, 0.8, (0, 255, 0), 2, cv2.LINE_AA)
+
+          quitString = "Press Q to Quit"
+          cv2.putText(resized_frame, quitString, (230, 250), font, 0.8, (0, 255, 0), 2, cv2.LINE_AA)
 
           # Display the resulting frame
           cv2.imshow('Frame',resized_frame)
