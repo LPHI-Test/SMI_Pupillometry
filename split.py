@@ -14,7 +14,7 @@ import time
 #text
 font = cv2.FONT_HERSHEY_SIMPLEX
 
-def ResizeWithAspectRatio(image, width=None, height=None, inter=cv2.INTER_AREA):
+def resizeWithAspectRatio(image, width=None, height=None, inter=cv2.INTER_AREA):
     dim = None
     (h, w) = image.shape[:2]
 
@@ -31,7 +31,7 @@ def ResizeWithAspectRatio(image, width=None, height=None, inter=cv2.INTER_AREA):
 
 def displayLeft(left):
     # Display the Left Eye
-    resized_left = ResizeWithAspectRatio(left, width = 640) #Resize by
+    resized_left = resizeWithAspectRatio(left, width = 640) #Resize by
     lString = "Left"
     cv2.putText(resized_left, lString, (0, 20), font, 0.8, (0, 255, 0), 2, cv2.LINE_AA)
     cv2.imshow('Left Eye',resized_left)
@@ -40,11 +40,27 @@ def displayLeft(left):
 
 def displayRight(right):
     # Display the Right Eye
-    resized_right = ResizeWithAspectRatio(right, width = 640) #Resize by
+    resized_right = resizeWithAspectRatio(right, width = 640) #Resize by
     rString = "Right"
     cv2.putText(resized_right, rString, (0, 20), font, 0.8, (0, 255, 0), 2, cv2.LINE_AA)
     cv2.imshow('Right Eye',resized_right)
     # resized_frame = ResizeWithAspectRatio(frame, height = 480)
+
+def displayMain(frame,cap):
+    #Display Main
+    fcount = cap.get(cv2.CAP_PROP_FRAME_COUNT)
+    resized_frame = resizeWithAspectRatio(frame, width = 640) #Resize by
+    # resized_frame = ResizeWithAspectRatio(frame, height = 480)
+
+    framePosition = cap.get(cv2.CAP_PROP_POS_FRAMES)
+    fpString = "Frame " + str(framePosition) + '/' + str(fcount)
+    cv2.putText(resized_frame, fpString, (230, 350), font, 0.8, (0, 255, 0), 2, cv2.LINE_AA)
+
+    quitString = "Press Q to Quit"
+    cv2.putText(resized_frame, quitString, (230, 250), font, 0.8, (0, 255, 0), 2, cv2.LINE_AA)
+
+    # Display the resulting frame
+    cv2.imshow('Frame',resized_frame)
 
 
 #Operation a freame form Night Owel security stystem use OCR to find out time of
@@ -64,6 +80,8 @@ def main():
     fps = cap.get(cv2.CAP_PROP_FPS)
     fcount = cap.get(cv2.CAP_PROP_FRAME_COUNT)
     timestamp = time.clock()
+
+    is_before_first = True;
 
     print("WIDTH: ", w)
     print("HEIGHT: ", h)
@@ -86,25 +104,20 @@ def main():
           leftImage = frame[1:int(h/2),1:int(w/2)]
           rightImage = frame[1:int(h/2),int(w/2+1):w]
 
+          #save first frame to a file
+          if(is_before_first and cv2.CAP_PROP_POS_FRAMES == 1):
+              is_before_first = False
+              cv2.imwrite("left.bmp",leftImage)
+              cv2.imwrite("right.bmp",rightImage)
+
+
+          displayMain(frame,cap)
           displayLeft(leftImage)
           displayRight(rightImage)
 
-          #Display Main
-          resized_frame = ResizeWithAspectRatio(frame, width = 640) #Resize by
-          # resized_frame = ResizeWithAspectRatio(frame, height = 480)
-
-          framePosition = cap.get(cv2.CAP_PROP_POS_FRAMES)
-          fpString = "Frame " + str(framePosition) + '/' + str(fcount)
-          cv2.putText(resized_frame, fpString, (230, 350), font, 0.8, (0, 255, 0), 2, cv2.LINE_AA)
-
-          quitString = "Press Q to Quit"
-          cv2.putText(resized_frame, quitString, (230, 250), font, 0.8, (0, 255, 0), 2, cv2.LINE_AA)
-
-          # Display the resulting frame
-          cv2.imshow('Frame',resized_frame)
 
           # Press Q on keyboard to  exit
-          if cv2.waitKey(25) & 0xFF == ord('q'):
+          if cv2.waitKey(1) & 0xFF == ord('q'):
               break
 
           # Break the loop
