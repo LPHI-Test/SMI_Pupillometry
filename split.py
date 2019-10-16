@@ -10,7 +10,8 @@
 import cv2
 import numpy as np
 import time
-
+import sys
+from find_pupil import pupillometry
 #text
 font = cv2.FONT_HERSHEY_SIMPLEX
 
@@ -70,7 +71,8 @@ def displayMain(frame,cap):
 def getTime(frame,timestamp):
     print("time")
 
-def main():
+#input frame: -1, the whole file, else a particular frame
+def main(frame = -1):
     # Create a VideoCapture object and read from input file
     # If the input is the camera, pass 0 instead of the video file name
     cap = cv2.VideoCapture('SMI_Pupilometry_Test.mp4')
@@ -95,34 +97,48 @@ def main():
     #   Read until video is completed
     while(cap.isOpened()):
       # Capture frame-by-frame
+
+      if(int(framenum) != -1):
+          cap.set(cv2.CAP_PROP_POS_FRAMES, int(framenum)-1)
+
       ret, frame = cap.read()
 
       if ret == True:
 
-          #getTime(frame,timestamp)
+          print(cap.get(cv2.CAP_PROP_POS_FRAMES))
+          if framenum == -1 or int(framenum) == int(cap.get(cv2.CAP_PROP_POS_FRAMES)) :
+              #getTime(frame,timestamp)
+              leftImage = frame[1:int(h/2),1:int(w/2)]
+              rightImage = frame[1:int(h/2),int(w/2+1):w]
 
-          leftImage = frame[1:int(h/2),1:int(w/2)]
-          rightImage = frame[1:int(h/2),int(w/2+1):w]
+              #save nth frame to a file
+              if(is_before_first and cap.get(cv2.CAP_PROP_POS_FRAMES) == 45):
+                  is_before_first = False
+                  cv2.imwrite("left.bmp",leftImage)
+                  cv2.imwrite("right.bmp",rightImage)
 
-          #save first frame to a file
-          if(is_before_first and cv2.CAP_PROP_POS_FRAMES == 1):
-              is_before_first = False
-              cv2.imwrite("left.bmp",leftImage)
-              cv2.imwrite("right.bmp",rightImage)
+              if(int(framenum) == -1):
+                  debug = 0;
+              else:
+                 debug = 3
 
+              leftImageEdit = pupillometry(leftImage,debug)
+              rightImageEdit = pupillometry(rightImage,debug)
 
-          displayMain(frame,cap)
-          displayLeft(leftImage)
-          displayRight(rightImage)
+              displayMain(frame,cap)
+              displayLeft(leftImageEdit)
+              displayRight(rightImageEdit)
 
+              # Press Q on keyboard to  exit
+              if cv2.waitKey(1) & 0xFF == ord('q'):
+                  break
 
-          # Press Q on keyboard to  exit
-          if cv2.waitKey(1) & 0xFF == ord('q'):
-              break
-
-          # Break the loop
+              # Break the loop
       else:
         break
+
+      if cap.get(cv2.CAP_PROP_POS_FRAMES) == int(framenum):
+          break
 
     # When everything done, release the video capture object
     cap.release()
@@ -131,4 +147,9 @@ def main():
     cv2.destroyAllWindows()
 
 if __name__ == "__main__":
-        main()
+    if(len(sys.argv) > 1):
+        framenum = sys.argv[1]
+    else:
+        framenum = -1
+    print("Frame Number: ",framenum)
+    main(framenum)
