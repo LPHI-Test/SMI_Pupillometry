@@ -113,6 +113,7 @@ def pupillometry(input_, debug = 2 ):
     if(contourFound == False):
         skipStr = "skip"
         cv2.putText(imgMain, skipStr, (230, 250), font, 0.8, (0, 255, 0), 2, cv2.LINE_AA)
+        rads = np.empty(Csize)
     else:
         cv2.drawContours(imgMain, bestContour, -1, (0,255,0), 3)
         if debug > 0:
@@ -160,7 +161,7 @@ def pupillometry(input_, debug = 2 ):
             plt.pause(0.10)
             if debug > 1:
                 cv2.waitKey(0)
-    return imgMain
+    return imgMain, rads, radius
 
 if __name__ == "__main__":
     pupillometry("right.bmp")

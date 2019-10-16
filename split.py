@@ -11,10 +11,31 @@ import cv2
 import numpy as np
 import time
 import sys
+import matplotlib.pyplot as plt
 from find_pupil import pupillometry
 #text
 font = cv2.FONT_HERSHEY_SIMPLEX
 
+def plotRadialPerimeter(leftRads,leftRadius,rightRads,rightRadius):
+    plt.subplot(121)
+    plt.clf()
+    plt.subplot(122)
+    plt.clf()
+
+    plt.subplot(121)
+    plt.ion()
+    plt.axis([-4,4,0,150])
+    plt.plot(leftRads,leftRadius,'ro')
+    plt.ylabel('left radius (pixels)')
+    plt.xlabel('angle (radians)')
+    plt.subplot(122)
+    plt.ion()
+    plt.axis([-4,4,0,150])
+    plt.plot(rightRads,rightRadius,'ro')
+    plt.ylabel('right radius (pixels)')
+    plt.xlabel('angle (radians)')
+    plt.show()
+    plt.pause(0.05)
 def resizeWithAspectRatio(image, width=None, height=None, inter=cv2.INTER_AREA):
     dim = None
     (h, w) = image.shape[:2]
@@ -122,12 +143,13 @@ def main(frame = -1):
               else:
                  debug = 3
 
-              leftImageEdit = pupillometry(leftImage,debug)
-              rightImageEdit = pupillometry(rightImage,debug)
+              leftImageEdit, leftRads, leftRadius = pupillometry(leftImage,debug)
+              rightImageEdit, rightRads, rightRadius = pupillometry(rightImage,debug)
 
               displayMain(frame,cap)
               displayLeft(leftImageEdit)
               displayRight(rightImageEdit)
+              plotRadialPerimeter(leftRads,leftRadius,rightRads,rightRadius)
 
               # Press Q on keyboard to  exit
               if cv2.waitKey(1) & 0xFF == ord('q'):
