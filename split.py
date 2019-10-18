@@ -25,13 +25,13 @@ def plotRadialPerimeter(leftRads,leftRadius,rightRads,rightRadius):
 
     plt.subplot(121)
     plt.ion()
-    plt.axis([-4,4,0,150])
+    plt.axis([-4,4,35,60])
     plt.plot(leftRads,leftRadius,'ro')
     plt.ylabel('left radius (pixels)')
     plt.xlabel('angle (radians)')
     plt.subplot(122)
     plt.ion()
-    plt.axis([-4,4,0,150])
+    plt.axis([-4,4,35,60])
     plt.plot(rightRads,rightRadius,'ro')
     plt.ylabel('right radius (pixels)')
     plt.xlabel('angle (radians)')
@@ -103,7 +103,7 @@ def main(frame = -1):
 
     # Create a VideoCapture object and read from input file
     # If the input is the camera, pass 0 instead of the video file name
-    cap = cv2.VideoCapture('SMI_Pupilometry_Test.mp4')
+    cap = cv2.VideoCapture('V1219_20850228_234726_Dilation2.mp4')
 
     w = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
     h = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
@@ -136,8 +136,8 @@ def main(frame = -1):
           print(cap.get(cv2.CAP_PROP_POS_FRAMES))
           if framenum == -1 or int(framenum) == int(cap.get(cv2.CAP_PROP_POS_FRAMES)) :
               #getTime(frame,timestamp)
-              leftImageOwl =  frame[1:int(h/2),1:int(w/2)]
-              rightImageOwl = frame[1:int(h/2),int(w/2+1):w]
+              leftImageOwl =  frame[10:int(h/2),1:int(w/2)]
+              rightImageOwl = frame[10:int(h/2),int(w/2+1):w]
 
               leftImage = cv2.resize(leftImageOwl, SMI_dim, interpolation=cv2.INTER_AREA)
               rightImage = cv2.resize(leftImageOwl, SMI_dim, interpolation=cv2.INTER_AREA)
