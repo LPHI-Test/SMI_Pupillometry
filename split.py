@@ -15,6 +15,7 @@ import matplotlib.pyplot as plt
 from find_pupil import pupillometry
 #text
 font = cv2.FONT_HERSHEY_SIMPLEX
+SMI_dim = (720, 480) # Dimension from SMI System
 
 def plotRadialPerimeter(leftRads,leftRadius,rightRads,rightRadius):
     plt.subplot(121)
@@ -94,6 +95,12 @@ def getTime(frame,timestamp):
 
 #input frame: -1, the whole file, else a particular frame
 def main(frame = -1):
+
+    if(int(framenum) == -1):
+        debug = 0;
+    else:
+        debug = 3
+
     # Create a VideoCapture object and read from input file
     # If the input is the camera, pass 0 instead of the video file name
     cap = cv2.VideoCapture('SMI_Pupilometry_Test.mp4')
@@ -129,8 +136,17 @@ def main(frame = -1):
           print(cap.get(cv2.CAP_PROP_POS_FRAMES))
           if framenum == -1 or int(framenum) == int(cap.get(cv2.CAP_PROP_POS_FRAMES)) :
               #getTime(frame,timestamp)
-              leftImage = frame[1:int(h/2),1:int(w/2)]
-              rightImage = frame[1:int(h/2),int(w/2+1):w]
+              leftImageOwl =  frame[1:int(h/2),1:int(w/2)]
+              rightImageOwl = frame[1:int(h/2),int(w/2+1):w]
+
+              leftImage = cv2.resize(leftImageOwl, SMI_dim, interpolation=cv2.INTER_AREA)
+              rightImage = cv2.resize(leftImageOwl, SMI_dim, interpolation=cv2.INTER_AREA)
+
+
+              if( debug > 0):
+                  print("Left Size: ", leftImage.shape)
+                  print("Right Size: ", leftImage.shape)
+
 
               #save nth frame to a file
               if(is_before_first and cap.get(cv2.CAP_PROP_POS_FRAMES) == 45):
@@ -138,10 +154,6 @@ def main(frame = -1):
                   cv2.imwrite("left.bmp",leftImage)
                   cv2.imwrite("right.bmp",rightImage)
 
-              if(int(framenum) == -1):
-                  debug = 0;
-              else:
-                 debug = 3
 
               leftImageEdit, leftRads, leftRadius = pupillometry(leftImage,debug)
               rightImageEdit, rightRads, rightRadius = pupillometry(rightImage,debug)
