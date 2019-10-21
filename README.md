@@ -1,7 +1,9 @@
 # SMI_Pupillometry
 Pupillometry using the SMI setup in the lab
 
-## Setup:
+## Hardware Setup:
+
+![Hardware Setup](https://github.com/LPHI-Test/SMI_Pupillometry/blob/master/Images/Hardware%20Setup.jpg)
 
 Each channel (2 channels) of the SMI system output (composite video) is connected to a HD Flow Pro Wireless MultiMedia Kit.  The output (composite video) of the HD Flow device is connected to a Night Owl L-DVR4 system.  The two composite video signals are combined in the Night Owl system.  The output (HDMI 1080P) of the Night Owl system is connected to a Evolve HDML Cloner Box which records the video on a USB thumb drive.
 
