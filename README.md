@@ -1,6 +1,10 @@
 # SMI_Pupillometry
 Pupillometry using the SMI setup in the lab
 
+## Software Setup
+Python 3.7.4
+OpenCV 4.1.1
+
 ## Hardware Setup:
 
 ![Hardware Setup](https://github.com/LPHI-Test/SMI_Pupillometry/blob/master/Images/Hardware%20Setup.jpg)
