@@ -2,8 +2,8 @@
 Pupillometry using the SMI setup in the lab
 
 ## Software Setup
-Python 3.7.4
-OpenCV 4.1.1
+* Python 3.7.4
+* OpenCV 4.1.1
 
 ## Hardware Setup:
 
