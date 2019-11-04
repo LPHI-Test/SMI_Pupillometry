@@ -54,7 +54,7 @@ def pupilContour(img,threshold, debug = 1):
                 print("Contour Area = ", cv2.contourArea(contour))
                 cv2.waitKey(0)
 
-            if(circularity > 0.75):
+            if(circularity > 0.80):
                 contourCandidates.append({'Circularity': circularity, 'Contour': contour})
 
     #if nothing found
@@ -99,7 +99,6 @@ def pupillometry(input_, debug = 2 ):
         try:
             # #Find best contour
             bestContour = pupilContour(img,initThresh + i,debug)
-
             #Find distance from center of contour and contour
             Csize, _ , _ = bestContour.shape
             radius = np.empty(Csize)
