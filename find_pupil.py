@@ -165,9 +165,17 @@ def pupillometry(input_, debug = 2, method = 1 ):
         return imgMain, rads, radius
     elif method == 2: #Zhaofeng He Method.
         #Reflection Removal and Iris Detection
+        imgray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
+        threshImg = cv2.adaptiveThreshold(imgray,255,cv2.ADAPTIVE_THRESH_MEAN_C,cv2.THRESH_BINARY,11,15)
+
+        if debug > 1:
+            cv2.imshow('threshold',threshImg)
+            cv2.imshow('gray',imgray)
+            cv2.waitKey(0) #TODO: make this a flag
         #Pupillary & Limbic Bd. Localizatoin
         #Eyelid Localization
         #Eyelash and Shadow Detection
+        cv2.waitKey(0)
         return imgMain, rads, radius
 if __name__ == "__main__":
     print(len(sys.argv))
