@@ -150,10 +150,16 @@ def main(frame = -1, filename = defaultFileName):
 
 
               #save nth frame to a file
-              if(is_before_first and cap.get(cv2.CAP_PROP_POS_FRAMES) == 45):
-                  is_before_first = False
-                  cv2.imwrite("left.bmp",leftImage)
-                  cv2.imwrite("right.bmp",rightImage)
+              if(framenum == -1):
+                  if(is_before_first and cap.get(cv2.CAP_PROP_POS_FRAMES) == 45):
+                      is_before_first = False
+                      cv2.imwrite("left.bmp",leftImage)
+                      cv2.imwrite("right.bmp",rightImage)
+              else:
+                  if(is_before_first and cap.get(cv2.CAP_PROP_POS_FRAMES) == framenum):
+                      is_before_first = False
+                      cv2.imwrite("left.bmp",leftImage)
+                      cv2.imwrite("right.bmp",rightImage)
 
 
               leftImageEdit, leftRads, leftRadius = pupillometry(leftImage,debug)

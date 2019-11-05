@@ -1,6 +1,6 @@
 import numpy as np
 import cv2  #add OpenCV Library
-import argparse
+#import argparse
 import math
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
@@ -10,6 +10,7 @@ import sys, getopt
 initThresh = 50#150 #Initial Threshold Value
 pupilMin = 600
 pupilMax = 600000
+defaultFileName = "right.bmp"
 #text
 font = cv2.FONT_HERSHEY_SIMPLEX
 #pupilContour
@@ -169,4 +170,17 @@ def pupillometry(input_, debug = 2, method = 1 ):
         #Eyelash and Shadow Detection
         return imgMain, rads, radius
 if __name__ == "__main__":
-    pupillometry("right.bmp")
+    print(len(sys.argv))
+    if(len(sys.argv) > 1):
+        if(len(sys.argv) == 2):
+            method = int(sys.argv[1])
+            filename = defaultFileName
+        if(len(sys.argv) == 3):
+            method = int(sys.argv[1])
+            filename = sys.argv[2]
+    else:
+        method = 1
+        filename = defaultFileName
+    print("Method : ",method)
+    print("File Name",filename)
+    pupillometry(filename,2,method)
