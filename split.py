@@ -16,6 +16,7 @@ from find_pupil import pupillometry
 #text
 font = cv2.FONT_HERSHEY_SIMPLEX
 SMI_dim = (720, 480) # Dimension from SMI System
+defaultFileName = 'V1219_20850228_234726_Dilation2.mp4'
 
 def plotRadialPerimeter(leftRads,leftRadius,rightRads,rightRadius):
     plt.subplot(121)
@@ -94,7 +95,7 @@ def getTime(frame,timestamp):
     print("time")
 
 #input frame: -1, the whole file, else a particular frame
-def main(frame = -1):
+def main(frame = -1, filename = defaultFileName):
 
     if(int(framenum) == -1):
         debug = 0;
@@ -103,7 +104,7 @@ def main(frame = -1):
 
     # Create a VideoCapture object and read from input file
     # If the input is the camera, pass 0 instead of the video file name
-    cap = cv2.VideoCapture('V1219_20850228_234726_Dilation2.mp4')
+    cap = cv2.VideoCapture(filename)
 
     w = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
     h = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
@@ -140,7 +141,7 @@ def main(frame = -1):
               rightImageOwl = frame[10:int(h/2),int(w/2+1):w]
 
               leftImage = cv2.resize(leftImageOwl, SMI_dim, interpolation=cv2.INTER_AREA)
-              rightImage = cv2.resize(leftImageOwl, SMI_dim, interpolation=cv2.INTER_AREA)
+              rightImage = cv2.resize(rightImageOwl, SMI_dim, interpolation=cv2.INTER_AREA)
 
 
               if( debug > 0):
@@ -181,9 +182,17 @@ def main(frame = -1):
     cv2.destroyAllWindows()
 
 if __name__ == "__main__":
+    print(len(sys.argv))
     if(len(sys.argv) > 1):
-        framenum = sys.argv[1]
+        if(len(sys.argv) == 2):
+            framenum = int(sys.argv[1])
+            filename = defaultFileName
+        if(len(sys.argv) == 3):
+            framenum = int(sys.argv[1])
+            filename = sys.argv[2]
     else:
         framenum = -1
+        filename = defaultFileName
     print("Frame Number: ",framenum)
-    main(framenum)
+    print("File Name",filename)
+    main(framenum, filename)

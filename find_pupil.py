@@ -54,7 +54,7 @@ def pupilContour(img,threshold, debug = 1):
                 print("Contour Area = ", cv2.contourArea(contour))
                 cv2.waitKey(0)
 
-            if(circularity > 0.75):
+            if(circularity > 0.80):
                 contourCandidates.append({'Circularity': circularity, 'Contour': contour})
 
     #if nothing found
@@ -71,8 +71,9 @@ def pupilContour(img,threshold, debug = 1):
 #Pupillometry
 #input1: input_, string of source file or cv2 image
 #input2: dubug, debug level
+#input3: method 1 = V.S. 2 = ZH
 #output: saves CSV file of contour of pupil and avi file, returns imgFile w/ edit
-def pupillometry(input_, debug = 2 ):
+def pupillometry(input_, debug = 2, method = 1 ):
 
     if isinstance(input_, str):
         img = cv2.imread(input_)
@@ -85,83 +86,87 @@ def pupillometry(input_, debug = 2 ):
     if debug > 0:
         cv2.imshow('Main',img)
 
-    #CSV file
-    # try:
-    #     os.remove("data.csv")
-    # except:
-    #     return "something went wrong"
-    csvdata = open(baseName+'.csv', "w")
-    csvdata.write('timestamp (ms),data (radius,radians)\n')
+    if(method == 1):
+        #CSV file
+        # try:
+        #     os.remove("data.csv")
+        # except:
+        #     return "something went wrong"
+        csvdata = open(baseName+'.csv', "w")
+        csvdata.write('timestamp (ms),data (radius,radians)\n')
+        contourFound = False
+        #keep trying with different thresholds, until you find something
+        for i in range(0,20,5):
+            try:
+                # #Find best contour
+                bestContour = pupilContour(img,initThresh + i,debug)
+                #Find distance from center of contour and contour
+                Csize, _ , _ = bestContour.shape
+                radius = np.empty(Csize)
+                M=cv2.moments(bestContour)
+                contourFound = True
+                break #exit loop
+            except cv2.error as e:
+                print('try again')
 
-    contourFound = False
-    #keep trying with different thresholds, until you find something
-    for i in range(0,20,5):
-        try:
-            # #Find best contour
-            bestContour = pupilContour(img,initThresh + i,debug)
-
-            #Find distance from center of contour and contour
-            Csize, _ , _ = bestContour.shape
-            radius = np.empty(Csize)
-            M=cv2.moments(bestContour)
-            contourFound = True
-            break #exit loop
-        except cv2.error as e:
-            print('try again')
-
-    #failed to find something
-    if(contourFound == False):
-        skipStr = "skip"
-        cv2.putText(imgMain, skipStr, (230, 250), font, 0.8, (0, 255, 0), 2, cv2.LINE_AA)
-        rads = np.empty(Csize)
-    else:
-        cv2.drawContours(imgMain, bestContour, -1, (0,255,0), 3)
-        if debug > 0:
-            cv2.imshow('Main',imgMain)
-            if debug > 1:
+        #failed to find something
+        if(contourFound == False):
+            skipStr = "skip"
+            cv2.putText(imgMain, skipStr, (230, 250), font, 0.8, (0, 255, 0), 2, cv2.LINE_AA)
+            rads = np.empty(Csize)
+        else:
+            cv2.drawContours(imgMain, bestContour, -1, (0,255,0), 3)
+            if debug > 0:
+                cv2.imshow('Main',imgMain)
+                if debug > 1:
+                    cv2.waitKey(0)
+            index = 0
+            centroid_x = int(M['m10']/M['m00'])
+            centroid_y = int(M['m01']/M['m00'])
+            cv2.circle(imgMain,(centroid_x,centroid_y), 5, (0,0,255), -1)
+            if debug > 0:
+                cv2.imshow('Main',imgMain)
                 cv2.waitKey(0)
-        index = 0
-        centroid_x = int(M['m10']/M['m00'])
-        centroid_y = int(M['m01']/M['m00'])
-        cv2.circle(imgMain,(centroid_x,centroid_y), 5, (0,0,255), -1)
-        if debug > 0:
-            cv2.imshow('Main',imgMain)
-            cv2.waitKey(0)
 
-        for n in bestContour:
-            dx = centroid_x-n[0][0]
-            dy = centroid_y-n[0][1]
-            radius[index] = math.sqrt( dx**2 + dy**2 )
-            index += 1
-        #Find angle from center of circle and contour
-        rads = np.empty(Csize)
-        index = 0
-        for n in bestContour:
-            dx = centroid_x-n[0][0]
-            dy = centroid_y-n[0][1]
-            rads[index] = math.atan2(dy,dx)
-            index += 1
-        # # #print rads
-        time = 1
-        #save to csv
-        csvdata.write(str(time)+',')
-        np.savetxt(csvdata,radius, '%s',delimiter=',', newline=',')
-        csvdata.write('\n')
-        csvdata.write(str(time))
-        np.savetxt(csvdata, rads, '%s', delimiter=',', newline=',')
-        csvdata.write('\n')
-        if debug > 0:
-            plt.ion()
-            plt.clf()
-            plt.axis([-4,4,0,200])
-            plt.plot(rads,radius,'ro')
-            plt.ylabel('radius (pixels)')
-            plt.xlabel('angle (radians)')
-            plt.show()
-            plt.pause(0.10)
-            if debug > 1:
-                cv2.waitKey(0)
-    return imgMain, rads, radius
-
+            for n in bestContour:
+                dx = centroid_x-n[0][0]
+                dy = centroid_y-n[0][1]
+                radius[index] = math.sqrt( dx**2 + dy**2 )
+                index += 1
+            #Find angle from center of circle and contour
+            rads = np.empty(Csize)
+            index = 0
+            for n in bestContour:
+                dx = centroid_x-n[0][0]
+                dy = centroid_y-n[0][1]
+                rads[index] = math.atan2(dy,dx)
+                index += 1
+            # # #print rads
+            time = 1
+            #save to csv
+            csvdata.write(str(time)+',')
+            np.savetxt(csvdata,radius, '%s',delimiter=',', newline=',')
+            csvdata.write('\n')
+            csvdata.write(str(time))
+            np.savetxt(csvdata, rads, '%s', delimiter=',', newline=',')
+            csvdata.write('\n')
+            if debug > 0:
+                plt.ion()
+                plt.clf()
+                plt.axis([-4,4,0,200])
+                plt.plot(rads,radius,'ro')
+                plt.ylabel('radius (pixels)')
+                plt.xlabel('angle (radians)')
+                plt.show()
+                plt.pause(0.10)
+                if debug > 1:
+                    cv2.waitKey(0)
+        return imgMain, rads, radius
+    elif method == 2: #Zhaofeng He Method.
+        #Reflection Removal and Iris Detection
+        #Pupillary & Limbic Bd. Localizatoin
+        #Eyelid Localization
+        #Eyelash and Shadow Detection
+        return imgMain, rads, radius
 if __name__ == "__main__":
     pupillometry("right.bmp")
