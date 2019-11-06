@@ -8,11 +8,19 @@ import os
 import sys, getopt
 
 initThresh = 50#150 #Initial Threshold Value
-pupilMin = 600
 pupilMax = 600000
 defaultFileName = "right.bmp"
 #text
 font = cv2.FONT_HERSHEY_SIMPLEX
+
+class Point():
+    x = -1
+    y = -1
+    x_l = -1
+    x_r = -1
+    y_t = -1
+    y_b = -1
+
 #pupilContour
 #input: color image, graysacle theshold, minimum pupil size, maximum pupil size
 #output contour
@@ -164,18 +172,117 @@ def pupillometry(input_, debug = 2, method = 1 ):
                     cv2.waitKey(0)
         return imgMain, rads, radius
     elif method == 2: #Zhaofeng He Method.
+
         #Reflection Removal and Iris Detection
+        #"reflection" map
         imgray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
-        threshImg = cv2.adaptiveThreshold(imgray,255,cv2.ADAPTIVE_THRESH_MEAN_C,cv2.THRESH_BINARY,11,15)
+        ret, threshImg = cv2.threshold(imgray,200,255,0) #TODO:Make adaptive
+
+        print(threshImg[1,1])
+
+        height, width = imgray.shape
+        #bilinear interpolation
+        bi_imgray = imgray.copy()
+        bi_threshImg = threshImg.copy()
+        rfPoints = np.where(threshImg == 255) #white points
+        listOfRfPoints = list(zip(rfPoints[0],rfPoints[1])) #list of white points
+        points = np.full((height,width),Point()) #matrix of all points
+
+        for pt in listOfRfPoints:
+            ytemp = pt[0]
+            xtemp = pt[1]
+            #threshImg[ytemp,xtemp] = 0
+            cv2.imshow('threshold',threshImg)
+            print(ytemp,xtemp)
+            #cv2.waitKey(0)
+
+            points[ytemp,xtemp].x = xtemp
+            points[ytemp,xtemp].y = ytemp
+            #find x_l
+            if(xtemp > 1):#not along the edge
+                for k in range(xtemp-1,-1,-1):
+                    if(threshImg[ytemp,k]==0):
+                        x_l = k-1
+                        points[ytemp,xtemp].x_l = x_l
+                        bi_threshImg[ytemp,x_l] = 100
+                        print(xtemp)
+                        #TODO: move backwards and fill in the rest.
+                        break
+            else:
+                x_l = -1
+
+
+            #find x_r
+            if(xtemp < 719):#not along the edge
+                for l in range(xtemp+1,719):
+                    if(threshImg[ytemp,l]==0):
+                        x_r = l+1
+                        points[ytemp, xtemp].x_r = x_r
+                        bi_threshImg[ytemp,x_r] = 100
+                        print(xtemp)
+                        #TODO: move backwards and fill in the rest.
+                        break
+            else:
+                x_r = -1
+
+            #find y_b
+            if(ytemp > 1): #not along the edge
+                for m in range(ytemp-1,-1,-1):
+                    if(threshImg[m,xtemp]==0):
+                        y_b = m-1
+                        points[ytemp,xtemp].y_b = y_b
+                        bi_threshImg[y_b,xtemp] = 100
+                        print(ytemp)
+                        #TODO: move backwards and fill in the rest.
+                        break
+            else:
+                x_b = -1
+
+            #find y_t
+            if( ytemp < 479):
+                for n in range(ytemp+1,479):
+                    if(threshImg[n,xtemp]==0):
+                        y_t = n +1
+                        points[ytemp,xtemp].y_t = y_t
+                        bi_threshImg[y_t,xtemp] = 100
+                        print(ytemp)
+                        #TODO: move backwarda and fill in the rest.
+                        break
+            else:
+                y_t = -1
+
+
+            if( x_l != -1 and x_r != -1 and  y_b != -1 and y_t != -1):
+                print('xtemp: ',xtemp,'ytemp: ', ytemp, 'x_l: ',x_l,'x_r: ', x_r,'y_t: ', y_t,'y_b: ', y_b)
+                print('I(P_L):',imgray[ytemp,x_l],'I(P_R):',imgray[ytemp,x_r],'I(P_t):',imgray[y_t,xtemp],'I(P_d):',imgray[y_b,xtemp])
+                #cv2.waitKey(0)
+                bi_imgray[ytemp,xtemp] = (imgray[ytemp,x_l]*(x_r-xtemp)+imgray[ytemp,x_r]*(xtemp-x_l))/(2*(x_r-x_l)) + \
+                                         (imgray[y_t,xtemp]*(ytemp-y_b)+imgray[y_b,xtemp]*(y_t-ytemp))/(2*(y_t-y_b))
+
+
+
+
+            # for l in range(j-1,0):
+            #     if(threshImg[i,l]==0):
+            #         points[i,l].x_r = k-1
+            #         #TODO: move backwards and fill in the rest.
+            #         break
+            #         #find l,r,t,d
+
+                    #x_l =
+                    #x_r =
+                    #y_t =
+                    #y_d =
 
         if debug > 1:
             cv2.imshow('threshold',threshImg)
             cv2.imshow('gray',imgray)
+            cv2.imshow('bi',bi_imgray)
+            cv2.imshow('bi_threshold',bi_threshImg)
             cv2.waitKey(0) #TODO: make this a flag
         #Pupillary & Limbic Bd. Localizatoin
         #Eyelid Localization
         #Eyelash and Shadow Detection
-        cv2.waitKey(0)
         return imgMain, rads, radius
 if __name__ == "__main__":
     print(len(sys.argv))
