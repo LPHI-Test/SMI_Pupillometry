@@ -177,13 +177,44 @@ def pupillometry(input_, debug = 2, method = 1 ):
         #"reflection" map
         imgray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
         ret, threshImg = cv2.threshold(imgray,200,255,0) #TODO:Make adaptive
-
-        print(threshImg[1,1])
-
         height, width = imgray.shape
+        cv2.imshow('pre-E',threshImg)
+        E = 4 # epsilon in pixels to expand reflection area
+
+        for n in range(0,E):
+            print('n:',n)
+            rfPoints = np.where(threshImg == 255) #white points
+            listOfRfPoints = list(zip(rfPoints[0],rfPoints[1])) #list of white point
+            for pt in listOfRfPoints:
+                ytemp = pt[0]
+                xtemp = pt[1]
+
+                if( xtemp + 1 < width):
+                    threshImg[ytemp,xtemp+1] = 255
+                if( xtemp + 1 < width and ytemp+1 < height ):
+                    threshImg[ytemp+1,xtemp+1] = 255
+                if( ytemp+1 < height ):
+                    threshImg[ytemp+1,xtemp] = 255
+                if( ytemp+1 < height and xtemp-1 >= 0):
+                    threshImg[ytemp+1,xtemp-1] = 255
+                if(xtemp-1 >= 0):
+                    threshImg[ytemp,xtemp-1] = 255
+                if(xtemp-1 >= 0 and ytemp-1 >= 0):
+                    threshImg[ytemp-1,xtemp-1] = 255
+                if(ytemp-1 >= 0):
+                    threshImg[ytemp-1,xtemp] = 255
+                if(ytemp-1 >= 0 and xtemp + 1 < width):
+                    threshImg[ytemp-1,xtemp+1] = 255
+
+        cv2.imshow('post-E',threshImg)
+        #print(threshImg[1,1])
+
+
         #bilinear interpolation
+        L = 2  # separation between the reflection points and their envelope points
         bi_imgray = imgray.copy()
         bi_threshImg = threshImg.copy()
+
         rfPoints = np.where(threshImg == 255) #white points
         listOfRfPoints = list(zip(rfPoints[0],rfPoints[1])) #list of white points
         points = np.full((height,width),Point()) #matrix of all points
@@ -191,21 +222,25 @@ def pupillometry(input_, debug = 2, method = 1 ):
         for pt in listOfRfPoints:
             ytemp = pt[0]
             xtemp = pt[1]
+            x_l = -1
+            x_r = -1
+            y_t = -1
+            y_b = -1
             #threshImg[ytemp,xtemp] = 0
             cv2.imshow('threshold',threshImg)
-            print(ytemp,xtemp)
+            #print(ytemp,xtemp)
             #cv2.waitKey(0)
 
             points[ytemp,xtemp].x = xtemp
             points[ytemp,xtemp].y = ytemp
             #find x_l
-            if(xtemp > 1):#not along the edge
+            if(xtemp > L-1):#not along the edge
                 for k in range(xtemp-1,-1,-1):
                     if(threshImg[ytemp,k]==0):
-                        x_l = k-1
+                        x_l = k-(L-1)
                         points[ytemp,xtemp].x_l = x_l
                         bi_threshImg[ytemp,x_l] = 100
-                        print(xtemp)
+                        #print(xtemp)
                         #TODO: move backwards and fill in the rest.
                         break
             else:
@@ -213,39 +248,39 @@ def pupillometry(input_, debug = 2, method = 1 ):
 
 
             #find x_r
-            if(xtemp < 719):#not along the edge
-                for l in range(xtemp+1,719):
+            if(xtemp < 719-L):#not along the edge
+                for l in range(xtemp+1,719-L):
                     if(threshImg[ytemp,l]==0):
-                        x_r = l+1
+                        x_r = l+(L-1)
                         points[ytemp, xtemp].x_r = x_r
                         bi_threshImg[ytemp,x_r] = 100
-                        print(xtemp)
+                        #print(xtemp)
                         #TODO: move backwards and fill in the rest.
                         break
             else:
                 x_r = -1
 
             #find y_b
-            if(ytemp > 1): #not along the edge
+            if(ytemp > L-1): #not along the edge
                 for m in range(ytemp-1,-1,-1):
                     if(threshImg[m,xtemp]==0):
-                        y_b = m-1
+                        y_b = m-(L-1)
                         points[ytemp,xtemp].y_b = y_b
                         bi_threshImg[y_b,xtemp] = 100
-                        print(ytemp)
+                        #print(ytemp)
                         #TODO: move backwards and fill in the rest.
                         break
             else:
                 x_b = -1
 
             #find y_t
-            if( ytemp < 479):
-                for n in range(ytemp+1,479):
+            if( ytemp < 479-L):
+                for n in range(ytemp+1,479-L):
                     if(threshImg[n,xtemp]==0):
-                        y_t = n +1
+                        y_t = n+(L-1)
                         points[ytemp,xtemp].y_t = y_t
                         bi_threshImg[y_t,xtemp] = 100
-                        print(ytemp)
+                        #print(ytemp)
                         #TODO: move backwarda and fill in the rest.
                         break
             else:
@@ -253,26 +288,11 @@ def pupillometry(input_, debug = 2, method = 1 ):
 
 
             if( x_l != -1 and x_r != -1 and  y_b != -1 and y_t != -1):
-                print('xtemp: ',xtemp,'ytemp: ', ytemp, 'x_l: ',x_l,'x_r: ', x_r,'y_t: ', y_t,'y_b: ', y_b)
-                print('I(P_L):',imgray[ytemp,x_l],'I(P_R):',imgray[ytemp,x_r],'I(P_t):',imgray[y_t,xtemp],'I(P_d):',imgray[y_b,xtemp])
+                #print('xtemp: ',xtemp,'ytemp: ', ytemp, 'x_l: ',x_l,'x_r: ', x_r,'y_t: ', y_t,'y_b: ', y_b)
+                #print('I(P_L):',imgray[ytemp,x_l],'I(P_R):',imgray[ytemp,x_r],'I(P_t):',imgray[y_t,xtemp],'I(P_d):',imgray[y_b,xtemp])
                 #cv2.waitKey(0)
                 bi_imgray[ytemp,xtemp] = (imgray[ytemp,x_l]*(x_r-xtemp)+imgray[ytemp,x_r]*(xtemp-x_l))/(2*(x_r-x_l)) + \
                                          (imgray[y_t,xtemp]*(ytemp-y_b)+imgray[y_b,xtemp]*(y_t-ytemp))/(2*(y_t-y_b))
-
-
-
-
-            # for l in range(j-1,0):
-            #     if(threshImg[i,l]==0):
-            #         points[i,l].x_r = k-1
-            #         #TODO: move backwards and fill in the rest.
-            #         break
-            #         #find l,r,t,d
-
-                    #x_l =
-                    #x_r =
-                    #y_t =
-                    #y_d =
 
         if debug > 1:
             cv2.imshow('threshold',threshImg)
