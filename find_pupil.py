@@ -7,6 +7,8 @@ import matplotlib.animation as animation
 import os
 import sys, getopt
 
+
+
 initThresh = 50#150 #Initial Threshold Value
 pupilMax = 600000
 defaultFileName = "right.bmp"
@@ -20,6 +22,42 @@ class Point():
     x_r = -1
     y_t = -1
     y_b = -1
+
+
+#rank_pFilter - 1D horizontal rank-p filter
+#input: grayscale image, Length, rank
+def rank_pFilter(imgray,L,p):
+    imgray_out = imgray.copy()
+
+    if (L % 2) == 1:
+        m = int((L-1)/2)  # -----!-----
+    else:
+        raise ValueError('Length must be odd')
+
+    if(p>L):
+        raise ValueError('Rank (p) cannot be reater thank length (L).')
+
+    h = imgray.shape[0]
+    w = imgray.shape[1]
+
+    for i in np.arange(m,h-m):
+        for j in np.arange(m,w-m):
+            window = imgray[i,j-m:j+m+1]
+            values, index = np.unique(window, return_index = True)
+
+            if(index.size < p): #not enouph ranks
+                pass
+            else:
+                imgray_out[i,j] = window[index[index.size-p]]
+                # print('window', window)
+                # print('sorted values',values)
+                # print('index', index)
+                # print('result',imgray_out[i,j-L:j+L+1])
+                # print('result v',imgray_out[i,j])
+
+    cv2.imshow('no lashes?',imgray_out)
+    return imgray_out
+
 
 #pupilContour
 #input: color image, graysacle theshold, minimum pupil size, maximum pupil size
@@ -181,6 +219,10 @@ def pupillometry(input_, debug = 2, method = 1 ):
         cv2.imshow('pre-E',threshImg)
         E = 4 # epsilon in pixels to expand reflection area
 
+        #rank-p filter
+        L_RANK_FILTER = 7
+        p_RANK_FILTER = 2
+
         for n in range(0,E):
             print('n:',n)
             rfPoints = np.where(threshImg == 255) #white points
@@ -293,6 +335,8 @@ def pupillometry(input_, debug = 2, method = 1 ):
                 #cv2.waitKey(0)
                 bi_imgray[ytemp,xtemp] = (imgray[ytemp,x_l]*(x_r-xtemp)+imgray[ytemp,x_r]*(xtemp-x_l))/(2*(x_r-x_l)) + \
                                          (imgray[y_t,xtemp]*(ytemp-y_b)+imgray[y_b,xtemp]*(y_t-ytemp))/(2*(y_t-y_b))
+
+        lp_imgray = rank_pFilter(bi_imgray,L_RANK_FILTER,p_RANK_FILTER) #L-length p-rank
 
         if debug > 1:
             cv2.imshow('threshold',threshImg)
