@@ -28,3 +28,9 @@ Each channel (2 channels) of the SMI system output (composite video) is connecte
 * Configure for 1080p setup. (button on remote)
 * Configure for 4:3 ratio setup. (button on remote)
 * Configure for BitRate Unlimited 16M. (button on remote)
+
+#IDE Setup
+* Atom w/ packages
+** autocomplete-python
+** kite
+** linter-pylint
