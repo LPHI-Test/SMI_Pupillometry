@@ -10,6 +10,7 @@ import sys, getopt
 
 
 initThresh = 50#150 #Initial Threshold Value
+pupilMin = 600
 pupilMax = 600000
 defaultFileName = "right.bmp"
 #text
@@ -220,7 +221,7 @@ def pupillometry(input_, debug = 2, method = 1 ):
         E = 4 # epsilon in pixels to expand reflection area
 
         #rank-p filter
-        L_RANK_FILTER = 7
+        L_RANK_FILTER = 13
         p_RANK_FILTER = 2
 
         for n in range(0,E):
