@@ -7,10 +7,9 @@
 # Night Owel Security stystem, splits the left and right
 # and assigns a timestamp based on the night owel clock.
 
-import cv2
-import numpy as np
 import time
 import sys
+import cv2
 import matplotlib.pyplot as plt
 from find_pupil import pupillometry
 #text
