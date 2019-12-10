@@ -1,11 +1,13 @@
-#Valentin Siderskiy 10/22/2019
-#Integrative Human Physiology Lab
-#Rutgers University
+"""
+Valentin Siderskiy 10/22/2019
+Integrative Human Physiology Lab
+Rutgers University
 
-#split.py
-#This function takes the video input recorded by the
-# Night Owel Security stystem, splits the left and right
-# and assigns a timestamp based on the night owel clock.
+split.py
+This function takes the video input recorded by the
+Night Owel Security stystem, splits the left and right
+and assigns a timestamp based on the night owel clock.
+"""
 
 import time
 import sys
@@ -13,9 +15,9 @@ import cv2
 import matplotlib.pyplot as plt
 from find_pupil import pupillometry
 #text
-font = cv2.FONT_HERSHEY_SIMPLEX
-SMI_dim = (720, 480) # Dimension from SMI System
-defaultFileName = 'V1219_20850228_234726_Dilation2.mp4'
+FONT = cv2.FONT_HERSHEY_SIMPLEX
+SMI_DIM = (720, 480) # Dimension from SMI System
+DEFAULT_FILE_NAME = 'V1219_20850228_234726_Dilation2.mp4'
 
 def plotRadialPerimeter(leftRads,leftRadius,rightRads,rightRadius):
     plt.subplot(121)
@@ -25,14 +27,14 @@ def plotRadialPerimeter(leftRads,leftRadius,rightRads,rightRadius):
 
     plt.subplot(121)
     plt.ion()
-    plt.axis([-4,4,35,60])
-    plt.plot(leftRads,leftRadius,'ro')
+    plt.axis([-4, 4, 35, 60])
+    plt.plot(leftRads, leftRadius, 'ro')
     plt.ylabel('left radius (pixels)')
     plt.xlabel('angle (radians)')
     plt.subplot(122)
     plt.ion()
-    plt.axis([-4,4,35,60])
-    plt.plot(rightRads,rightRadius,'ro')
+    plt.axis([-4, 4, 35, 60])
+    plt.plot(rightRads, rightRadius, 'ro')
     plt.ylabel('right radius (pixels)')
     plt.xlabel('angle (radians)')
     plt.show()
@@ -54,9 +56,9 @@ def resizeWithAspectRatio(image, width=None, height=None, inter=cv2.INTER_AREA):
 
 def displayLeft(left):
     # Display the Left Eye
-    resized_left = resizeWithAspectRatio(left, width = 640) #Resize by
+    resized_left = resizeWithAspectRatio(left, width =640) #Resize by
     lString = "Left"
-    cv2.putText(resized_left, lString, (0, 20), font, 0.8, (0, 255, 0), 2, cv2.LINE_AA)
+    cv2.putText(resized_left, lString, (0, 20), FONT, 0.8, (0, 255, 0), 2, cv2.LINE_AA)
     cv2.imshow('Left Eye',resized_left)
     # resized_frame = ResizeWithAspectRatio(frame, height = 480)
 
@@ -65,7 +67,7 @@ def displayRight(right):
     # Display the Right Eye
     resized_right = resizeWithAspectRatio(right, width = 640) #Resize by
     rString = "Right"
-    cv2.putText(resized_right, rString, (0, 20), font, 0.8, (0, 255, 0), 2, cv2.LINE_AA)
+    cv2.putText(resized_right, rString, (0, 20), FONT, 0.8, (0, 255, 0), 2, cv2.LINE_AA)
     cv2.imshow('Right Eye',resized_right)
     # resized_frame = ResizeWithAspectRatio(frame, height = 480)
 
@@ -77,10 +79,10 @@ def displayMain(frame,cap):
 
     framePosition = cap.get(cv2.CAP_PROP_POS_FRAMES)
     fpString = "Frame " + str(framePosition) + '/' + str(fcount)
-    cv2.putText(resized_frame, fpString, (230, 350), font, 0.8, (0, 255, 0), 2, cv2.LINE_AA)
+    cv2.putText(resized_frame, fpString, (230, 350), FONT, 0.8, (0, 255, 0), 2, cv2.LINE_AA)
 
     quitString = "Press Q to Quit"
-    cv2.putText(resized_frame, quitString, (230, 250), font, 0.8, (0, 255, 0), 2, cv2.LINE_AA)
+    cv2.putText(resized_frame, quitString, (230, 250), FONT, 0.8, (0, 255, 0), 2, cv2.LINE_AA)
 
     # Display the resulting frame
     cv2.imshow('Frame',resized_frame)
@@ -94,7 +96,7 @@ def getTime(frame,timestamp):
     print("time")
 
 #input frame: -1, the whole file, else a particular frame
-def main(frame = -1, filename = defaultFileName):
+def main(frame = -1, filename = DEFAULT_FILE_NAME):
 
     if(int(framenum) == -1):
         debug = 0;
@@ -139,8 +141,8 @@ def main(frame = -1, filename = defaultFileName):
               leftImageOwl =  frame[10:int(h/2),1:int(w/2)]
               rightImageOwl = frame[10:int(h/2),int(w/2+1):w]
 
-              leftImage = cv2.resize(leftImageOwl, SMI_dim, interpolation=cv2.INTER_AREA)
-              rightImage = cv2.resize(rightImageOwl, SMI_dim, interpolation=cv2.INTER_AREA)
+              leftImage = cv2.resize(leftImageOwl, SMI_DIM, interpolation=cv2.INTER_AREA)
+              rightImage = cv2.resize(rightImageOwl, SMI_DIM, interpolation=cv2.INTER_AREA)
 
 
               if( debug > 0):
@@ -191,13 +193,13 @@ if __name__ == "__main__":
     if(len(sys.argv) > 1):
         if(len(sys.argv) == 2):
             framenum = int(sys.argv[1])
-            filename = defaultFileName
+            filename = DEFAULT_FILE_NAME
         if(len(sys.argv) == 3):
             framenum = int(sys.argv[1])
             filename = sys.argv[2]
     else:
         framenum = -1
-        filename = defaultFileName
+        filename = DEFAULT_FILE_NAME
     print("Frame Number: ",framenum)
     print("File Name",filename)
     main(framenum, filename)
