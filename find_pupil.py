@@ -1,22 +1,21 @@
+"""finds pupil, exports center and perimeter  """
+import math
+import sys
+#import getopt
 import numpy as np
 import cv2  #add OpenCV Library
 #import argparse
-import math
 import matplotlib.pyplot as plt
-import matplotlib.animation as animation
-import os
-import sys, getopt
 
-
-
-initThresh = 50#150 #Initial Threshold Value
-pupilMin = 600
-pupilMax = 600000
-defaultFileName = "right.bmp"
+INIT_THRESH = 50#150 #Initial Threshold Value
+PUPIL_MIN = 600
+PUPIL_MAX = 600000
+DEFAULT_FILE_NAME = "right.bmp"
 #text
-font = cv2.FONT_HERSHEY_SIMPLEX
+FONT = cv2.FONT_HERSHEY_SIMPLEX
 
 class Point():
+    """Dont remember what this is for """
     x = -1
     y = -1
     x_l = -1
@@ -25,18 +24,20 @@ class Point():
     y_b = -1
 
 
-#rank_pFilter - 1D horizontal rank-p filter
-#input: grayscale image, Length, rank
-def rank_pFilter(imgray,L,p):
+def rank_p_filter(imgray, length, rank):
+    '''
+    #rank_p_filter - 1D horizontal rank-p filter
+    #input: grayscale image, Length, rank
+    '''
     imgray_out = imgray.copy()
 
-    if (L % 2) == 1:
-        m = int((L-1)/2)  # -----!-----
+    if (length % 2) == 1:
+        m = int((length-1)/2)  # -----!-----
     else:
         raise ValueError('Length must be odd')
 
-    if(p>L):
-        raise ValueError('Rank (p) cannot be reater thank length (L).')
+    if(rank>length):
+        raise ValueError('Rank (rank) cannot be greater than length (length).')
 
     h = imgray.shape[0]
     w = imgray.shape[1]
@@ -46,17 +47,17 @@ def rank_pFilter(imgray,L,p):
             window = imgray[i,j-m:j+m+1]
             values, index = np.unique(window, return_index = True)
 
-            if(index.size < p): #not enouph ranks
+            if(index.size < rank): #not enouph ranks
                 pass
             else:
-                imgray_out[i,j] = window[index[index.size-p]]
+                imgray_out[i,j] = window[index[index.size-rank]]
                 # print('window', window)
                 # print('sorted values',values)
                 # print('index', index)
-                # print('result',imgray_out[i,j-L:j+L+1])
+                # print('result',imgray_out[i,j-length:j+length+1])
                 # print('result v',imgray_out[i,j])
 
-    cv2.imshow('no lashes?',imgray_out)
+    cv2.imshow('no lashes?', imgray_out)
     return imgray_out
 
 
@@ -66,7 +67,7 @@ def rank_pFilter(imgray,L,p):
 def pupilContour(img,threshold, debug = 1):
     #Find contour
     imgray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
-    ret,threshImg = cv2.threshold(imgray,initThresh,255,0)
+    ret,threshImg = cv2.threshold(imgray,INIT_THRESH,255,0)
 
     if debug > 1:
         cv2.imshow('threshold',threshImg)
@@ -85,7 +86,7 @@ def pupilContour(img,threshold, debug = 1):
     bestContour = np.empty(contours[1].shape) #Empty Contour
     for contour in contours:
         area = cv2.contourArea(contour)
-        if area > pupilMin and area < pupilMax:
+        if area > PUPIL_MIN and area < PUPIL_MAX:
 
             #circle test
             perimeter = cv2.arcLength(contour, True)
@@ -147,7 +148,7 @@ def pupillometry(input_, debug = 2, method = 1 ):
         for i in range(0,20,5):
             try:
                 # #Find best contour
-                bestContour = pupilContour(img,initThresh + i,debug)
+                bestContour = pupilContour(img,INIT_THRESH + i,debug)
                 #Find distance from center of contour and contour
                 Csize, _ , _ = bestContour.shape
                 radius = np.empty(Csize)
@@ -160,7 +161,7 @@ def pupillometry(input_, debug = 2, method = 1 ):
         #failed to find something
         if(contourFound == False):
             skipStr = "skip"
-            cv2.putText(imgMain, skipStr, (230, 250), font, 0.8, (0, 255, 0), 2, cv2.LINE_AA)
+            cv2.putText(imgMain, skipStr, (230, 250), FONT, 0.8, (0, 255, 0), 2, cv2.LINE_AA)
             rads = np.empty(Csize)
         else:
             cv2.drawContours(imgMain, bestContour, -1, (0,255,0), 3)
@@ -337,7 +338,7 @@ def pupillometry(input_, debug = 2, method = 1 ):
                 bi_imgray[ytemp,xtemp] = (imgray[ytemp,x_l]*(x_r-xtemp)+imgray[ytemp,x_r]*(xtemp-x_l))/(2*(x_r-x_l)) + \
                                          (imgray[y_t,xtemp]*(ytemp-y_b)+imgray[y_b,xtemp]*(y_t-ytemp))/(2*(y_t-y_b))
 
-        lp_imgray = rank_pFilter(bi_imgray,L_RANK_FILTER,p_RANK_FILTER) #L-length p-rank
+        lp_imgray = rank_p_filter(bi_imgray,L_RANK_FILTER,p_RANK_FILTER) #L-length p-rank
 
         if debug > 1:
             cv2.imshow('threshold',threshImg)
@@ -354,13 +355,13 @@ if __name__ == "__main__":
     if(len(sys.argv) > 1):
         if(len(sys.argv) == 2):
             method = int(sys.argv[1])
-            filename = defaultFileName
+            filename = DEFAULT_FILE_NAME
         if(len(sys.argv) == 3):
             method = int(sys.argv[1])
             filename = sys.argv[2]
     else:
         method = 1
-        filename = defaultFileName
+        filename = DEFAULT_FILE_NAME
     print("Method : ",method)
     print("File Name",filename)
     pupillometry(filename,2,method)

@@ -9,7 +9,6 @@ Night Owel Security stystem, splits the left and right
 and assigns a timestamp based on the night owel clock.
 """
 
-import time
 import sys
 import cv2
 import matplotlib.pyplot as plt
@@ -128,51 +127,50 @@ def main(frame=-1, filename=DEFAULT_FILE_NAME):
         print("Error opening video stream or file")
 
     #   Read until video is completed
-    while(cap.isOpened()):
+    while cap.isOpened():
       # Capture frame-by-frame
 
-        if(int(framenum) != -1):
+        if int(framenum) != -1:
             cap.set(cv2.CAP_PROP_POS_FRAMES, int(framenum)-1)
 
         ret, frame = cap.read()
 
-        if ret == True:
+        if ret:
 
             print(cap.get(cv2.CAP_PROP_POS_FRAMES))
-            if framenum == -1 or int(framenum) == int(cap.get(cv2.CAP_PROP_POS_FRAMES)) :
+            if framenum == -1 or int(framenum) == int(cap.get(cv2.CAP_PROP_POS_FRAMES)):
                 #get_time(frame,timestamp)
-                leftImageOwl =  frame[10:int(frame_h/2),1:int(frame_w/2)]
-                rightImageOwl = frame[10:int(frame_h/2),int(frame_w/2+1):frame_w]
+                left_image_owl = frame[10:int(frame_h/2), 1:int(frame_w/2)]
+                right_imag_owl = frame[10:int(frame_h/2), int(frame_w/2+1):frame_w]
 
-                leftImage = cv2.resize(leftImageOwl, SMI_DIM, interpolation=cv2.INTER_AREA)
-                rightImage = cv2.resize(rightImageOwl, SMI_DIM, interpolation=cv2.INTER_AREA)
+                left_image = cv2.resize(left_image_owl, SMI_DIM, interpolation=cv2.INTER_AREA)
+                right_image = cv2.resize(right_imag_owl, SMI_DIM, interpolation=cv2.INTER_AREA)
 
-
-                if( debug > 0):
-                    print("Left Size: ", leftImage.shape)
-                    print("Right Size: ", leftImage.shape)
+                if debug > 0:
+                    print("Left Size: ", left_image.shape)
+                    print("Right Size: ", left_image.shape)
 
 
               #save nth frame to a file
-                if(framenum == -1):
+                if framenum == -1:
                     if(is_before_first and cap.get(cv2.CAP_PROP_POS_FRAMES) == 45):
                         is_before_first = False
-                        cv2.imwrite("left.bmp",leftImage)
-                        cv2.imwrite("right.bmp",rightImage)
+                        cv2.imwrite("left.bmp", left_image)
+                        cv2.imwrite("right.bmp", right_image)
                 else:
                     if(is_before_first and cap.get(cv2.CAP_PROP_POS_FRAMES) == framenum):
                         is_before_first = False
-                        cv2.imwrite("left.bmp",leftImage)
-                        cv2.imwrite("right.bmp",rightImage)
+                        cv2.imwrite("left.bmp", left_image)
+                        cv2.imwrite("right.bmp", right_image)
 
 
-                leftImageEdit, left_rads, left_radius = pupillometry(leftImage,debug)
-                rightImageEdit, right_rads, right_radius = pupillometry(rightImage,debug)
+                left_image_edit, left_rads, left_radius = pupillometry(left_image, debug)
+                right_image_edit, right_rads, right_radius = pupillometry(right_image, debug)
 
                 display_main(frame, cap)
-                display_left(leftImageEdit)
-                display_right(rightImageEdit)
-                plot_radial_perimeter(left_rads,left_radius,right_rads,right_radius)
+                display_left(left_image_edit)
+                display_right(right_image_edit)
+                plot_radial_perimeter(left_rads, left_radius, right_rads, right_radius)
 
                 # Press Q on keyboard to  exit
                 if cv2.waitKey(1) & 0xFF == ord('q'):
@@ -193,16 +191,16 @@ def main(frame=-1, filename=DEFAULT_FILE_NAME):
 
 if __name__ == "__main__":
     print(len(sys.argv))
-    if(len(sys.argv) > 1):
-        if(len(sys.argv) == 2):
+    if len(sys.argv) > 1 :
+        if len(sys.argv) == 2:
             framenum = int(sys.argv[1])
             filename = DEFAULT_FILE_NAME
-        if(len(sys.argv) == 3):
+        if len(sys.argv) == 3:
             framenum = int(sys.argv[1])
             filename = sys.argv[2]
     else:
         framenum = -1
         filename = DEFAULT_FILE_NAME
-    print("Frame Number: ",framenum)
-    print("File Name",filename)
+    print("Frame Number: ", framenum)
+    print("File Name", filename)
     main(framenum, filename)
