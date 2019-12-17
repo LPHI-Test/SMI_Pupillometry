@@ -244,9 +244,14 @@ function-naming-style=snake_case
 good-names=i,
            j,
            k,
+           l,
+           m,
+           n,
            ex,
            Run,
-           _
+           _,
+           x,
+           y
 
 # Include a hint for the correct naming format with invalid-name.
 include-naming-hint=no
@@ -345,8 +350,7 @@ logging-modules=logging
 
 # List of note tags to take in consideration, separated by a comma.
 notes=FIXME,
-      XXX,
-      TODO
+      XXX
 
 
 [SIMILARITIES]
