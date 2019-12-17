@@ -45,7 +45,7 @@ def rank_p_filter(imgray, length, rank):
     for i in np.arange(mid, hight-mid):
         for j in np.arange(mid, width-mid):
             window = imgray[i, j-mid:j+mid+1]
-            _, index, = np.unique(window, return_index=True)
+            _, index = np.unique(window, return_index=True)
 
             if index.size < rank: #not enouph ranks
                 pass
