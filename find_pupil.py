@@ -344,7 +344,11 @@ def pupillometry(input_, debug=2, method=1):
                     (imgray[ytemp, x_l]*(x_r-xtemp)+imgray[ytemp, x_r]*(xtemp-x_l))/(2*(x_r-x_l)) + \
                     (imgray[y_t, xtemp]*(ytemp-y_b)+imgray[y_b, xtemp]*(y_t-ytemp))/(2*(y_t-y_b))
 
+        #Eyelid Localization
+        #1D rank filter removes eyelashes
         lp_imgray = rank_p_filter(bi_imgray, L_RANK_FILTER, P_RANK_FILTER) #L-length p-rank
+
+        cv2.imwrite("no_lashes.bmp", lp_imgray)
 
         if debug > 1:
             cv2.imshow('threshold', thresh_img)
