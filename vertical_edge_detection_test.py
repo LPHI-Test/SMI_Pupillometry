@@ -54,6 +54,7 @@ ddepth = -1
 scalePast = cv2.getTrackbarPos('scale', 'parameters')
 deltaPast = cv2.getTrackbarPos('delta', 'parameters')
 apSizePast = cv2.getTrackbarPos('apertureSize', 'parameters')*2+3
+first = True;
 
 while(True):
     # get threshold value from trackbar
@@ -63,8 +64,8 @@ while(True):
     # aperture size can only be 3,5, or 7
     apSize = cv2.getTrackbarPos('apertureSize', 'parameters')*2+3
 
-    if  (scalePast != scale) or (deltaPast != delta) or (apSizePast != apSize) :
-
+    if  ((first == True) or scalePast != scale) or (deltaPast != delta) or (apSizePast != apSize) :
+        first = False
         # print out the values
         print('scale: {}'.format(scale))
         print('delta: {}'.format(delta))
