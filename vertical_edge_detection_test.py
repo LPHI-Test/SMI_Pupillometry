@@ -32,12 +32,15 @@ def max_edge(imgray_in):
     h = imgray_in.shape[0]
     w = imgray_in.shape[1]
 
+    maxEdgePoints = []
+
     for i in np.arange(0,w-1):
         minVal, maxVal, minLoc, maxLoc = cv2.minMaxLoc(imgray_in[:,i])#find max
         imgray_out[maxLoc[1],i,0] = 0
         imgray_out[maxLoc[1],i,1] = 0
         imgray_out[maxLoc[1],i,2] = 255
-    return imgray_out
+        maxEdgePoints.append(maxLoc)
+    return maxEdgePoints, imgray_out
 
 # empty callback function for creating trackar
 def callback(foo):
@@ -73,12 +76,12 @@ while(True):
 
         #edge_top = cv2.Canny(img_top, th1, th2, apertureSize=apSize, L2gradient=norm_flag)
         sobely_top = cv2.Sobel(img_top,ddepth,0,1,ksize=apSize, scale=scale, delta=delta, borderType=cv2.BORDER_DEFAULT)
-        imtop = max_edge(sobely_top)
+        maxEdgePointsTop ,imtop = max_edge(sobely_top)
         cv2.imshow('top', imtop)
 
         #edge_bottom = cv2.Canny(img_bottom, th1, th2, apertureSize=apSize, L2gradient=norm_flag)
         sobely_bottom = cv2.Sobel(img_bottom,ddepth,0,1,ksize=apSize, scale=scale, delta=delta, borderType=cv2.BORDER_DEFAULT)
-        imbot = max_edge(sobely_bottom)
+        maxEdgePointsBottom ,imbot = max_edge(sobely_bottom)
         cv2.imshow('bot',imbot)
 
         abs_grad_y_top = cv2.convertScaleAbs(sobely_top)
