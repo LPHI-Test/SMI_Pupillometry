@@ -37,29 +37,69 @@ img_bottom = cv2.cvtColor(img_bottom, cv2.COLOR_BGR2GRAY)
 cv2.imshow('topRaw',img_top)
 cv2.imshow('bottomRaw',img_bottom)
 
-def noisy_edge_elimination(maxEdgePoints,pupilCenter):
+def noisy_edge_elimination(Eraw,pupilCenter):
     #Eliminate noisy edge points via shape similarity calculation
-    thetaArray = []
-    radiusArray = []
-
-    rightSize = len(maxEdgePoints)-pupilCenter[0]-1
-    leftSize = len(maxEdgePoints)-rightSize-1
+    rightSize = len(Eraw)-pupilCenter[0]-1
+    leftSize = len(Eraw)-rightSize-1
     x = np.arange(-leftSize,rightSize+1)
-    M2a = 0.001
-    M2 = -M2a*(x**2)+66
-    M1 = -M2a*(x**2)+66 + 0.16*x+0.0008*(x**2)
-    M3 = -M2a*(x**2)+66 - 0.16*x+0.0008*(x**2)
 
-    print(pupilCenter[0])
-    print(len(maxEdgePoints))
-    print(x)
-    plt.xlim(-100, 100)
+    #limit to +/-100 pixels (future limit to contras only in iris)
+    x100 = np.arange(-100,100+1)
+    Eraw100 = []
+    for n in np.arange(-100,100+1):
+        Eraw100.append(Eraw[pupilCenter[0]-n])
+
+    M2a = 0.001
+    M2 = -M2a*(x100**2)+66
+    M3 = -M2a*(x100**2)+66 + 0.16*x100+0.0008*(x100**2)
+    M1 = -M2a*(x100**2)+66 - 0.16*x100+0.0008*(x100**2)
+
+    D1 = M1-Eraw100
+    D2 = M2-Eraw100
+    D3 = M3-Eraw100
+
+    histD2, bin_edges_D2 = np.histogram(D2, bins='auto')
+    histD1, _ = np.histogram(D1, bins=bin_edges_D2)
+    histD3, _ = np.histogram(D3, bins=bin_edges_D2)
+
+    #find max
+    _, maxValD2, _, maxLocD2 = cv2.minMaxLoc(histD2)
+    _, maxValD3, _, maxLocD3 = cv2.minMaxLoc(histD3)
+    _, maxValD1, _, maxLocD1 = cv2.minMaxLoc(histD1)
+
+    maxVals=[maxValD1,maxValD2,maxValD3]
+    maxM = maxVals.index(max(maxVals))
+
+    if maxM==0:
+        pass#use M1
+    elif maxM==1:
+        pass#use M2
+    elif maxM==2:
+        pass#use M3
+
+    print(histD2)
+    print(histD1)
+    print(histD3)
+
+    plt.subplot(2,3,1)
+    #plt.xlim(-100, 100)
     plt.ylim(0, 105)
-    plt.plot(x,maxEdgePoints)
-    plt.plot(x,M2)
-    plt.plot(x,M1)
-    plt.plot(x,M3)
-    plt.plot()
+    plt.plot(x100,M1, label="M1", color='black',linestyle='dashdot')
+    plt.plot(x100,M2, label="M2", color='red',linewidth=2)
+    plt.plot(x100,M3, label="M3", color='blue',linestyle='dashed')
+    plt.plot(x100,Eraw100, label="Eraw", color='orange')
+    plt.legend()
+    plt.subplot(2,3,2)
+    plt.plot(x100,D1, label="D1", color='black',linestyle='dashdot')
+    plt.plot(x100,D2, label="D2", color='red')
+    plt.plot(x100,D3, label="D2", color='blue', linestyle='dashed')
+    plt.legend()
+    plt.subplot(2,3,3)
+    plt.hist(D1, bins=bin_edges_D2, label='Hist. D1',color='black',linestyle='dashdot')
+    plt.hist(D3, bins=bin_edges_D2, label='Hist. D3', color='blue', linestyle='dashed')
+    plt.hist(D2, bins=bin_edges_D2, label='Hist. D2', color='red')
+    plt.xlim(-40, 40)
+    plt.legend()
     plt.show()
     return 1
 
