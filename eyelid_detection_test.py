@@ -3,6 +3,7 @@ import time
 import cv2
 import numpy as np
 import argparse
+import matplotlib.pyplot as plt
 
 # parse argument
 ap = argparse.ArgumentParser()
@@ -11,20 +12,56 @@ args = vars(ap.parse_args())
 
 # reads the image
 img = cv2.imread(args['image'])
-
 height, width = img.shape[:2]
 
+#disply input
+pupilCenter = (int(width * .5)-20,int(height * .5))#guess for now
+img_input = img.copy()
+print(pupilCenter)
+cv2.circle(img_input,pupilCenter,4,(0,0,255),-1)
+cv2.imshow('input',img_input)
+
+
 start_row, start_col = int(0), int(0)
-end_row, end_col = int(height * .5), int(width)
+end_row, end_col = pupilCenter[1], int(width)
 
 img_top = img[start_row:end_row , start_col:end_col]
 #img_top =  cv2.GaussianBlur(img_top,(3,3),0)
-img_top = cv2.cvtColor(img_top, cv2.COLOR_BGR2GRAY)
 
+img_top = cv2.cvtColor(img_top, cv2.COLOR_BGR2GRAY)
 
 img_bottom = img[end_row:height , start_col:end_col]
 #img_bottom = cv2.GaussianBlur(img_bottom,(3,3),0)
 img_bottom = cv2.cvtColor(img_bottom, cv2.COLOR_BGR2GRAY)
+
+cv2.imshow('topRaw',img_top)
+cv2.imshow('bottomRaw',img_bottom)
+
+def noisy_edge_elimination(maxEdgePoints,pupilCenter):
+    #Eliminate noisy edge points via shape similarity calculation
+    thetaArray = []
+    radiusArray = []
+
+    rightSize = len(maxEdgePoints)-pupilCenter[0]-1
+    leftSize = len(maxEdgePoints)-rightSize-1
+    x = np.arange(-leftSize,rightSize+1)
+    M2a = 0.001
+    M2 = -M2a*(x**2)+66
+    M1 = -M2a*(x**2)+66 + 0.16*x+0.0008*(x**2)
+    M3 = -M2a*(x**2)+66 - 0.16*x+0.0008*(x**2)
+
+    print(pupilCenter[0])
+    print(len(maxEdgePoints))
+    print(x)
+    plt.xlim(-100, 100)
+    plt.ylim(0, 105)
+    plt.plot(x,maxEdgePoints)
+    plt.plot(x,M2)
+    plt.plot(x,M1)
+    plt.plot(x,M3)
+    plt.plot()
+    plt.show()
+    return 1
 
 
 def max_edge(imgray_in):
@@ -39,7 +76,7 @@ def max_edge(imgray_in):
         imgray_out[maxLoc[1],i,0] = 0
         imgray_out[maxLoc[1],i,1] = 0
         imgray_out[maxLoc[1],i,2] = 255
-        maxEdgePoints.append(maxLoc)
+        maxEdgePoints.append(h-maxLoc[1])
     return maxEdgePoints, imgray_out
 
 # empty callback function for creating trackar
@@ -77,6 +114,8 @@ while(True):
         #edge_top = cv2.Canny(img_top, th1, th2, apertureSize=apSize, L2gradient=norm_flag)
         sobely_top = cv2.Sobel(img_top,ddepth,0,1,ksize=apSize, scale=scale, delta=delta, borderType=cv2.BORDER_DEFAULT)
         maxEdgePointsTop ,imtop = max_edge(sobely_top)
+        print((pupilCenter[0],0))
+        noisy_edge_elimination(maxEdgePointsTop, (pupilCenter[0],0))
         cv2.imshow('top', imtop)
 
         #edge_bottom = cv2.Canny(img_bottom, th1, th2, apertureSize=apSize, L2gradient=norm_flag)
