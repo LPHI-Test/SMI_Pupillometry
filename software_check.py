@@ -3,18 +3,24 @@ import sys
 import subprocess
 import pkg_resources
 
+# collects user versions
 pyVersion = sys.version[0:5]
 cvVersion = cv2.__version__
 
+# constants
+# change according to version
+pythonCheck = "3.7.4"
+cvCheck = "4.1.1"
+
 # check python version
-if(pyVersion != "3.7.4"):
+if(pyVersion != pythonCheck):
         print("Error: using Python ", pyVersion)
-        print("Install Python 3.7.4")
+        print("Install Python ", pythonCheck)
 
 # check OpenCV version
-if(cvVersion != "4.1.1"):
+if(cvVersion != cvCheck):
     print("Error: using OpenCV ", cvVersion)
-    print("Install OpenCV 4.1.1")
+    print("Install OpenCV ", cvCheck)
 
 # check for libraries
 required = {'math', 'matplotlib', 'numpy'}
