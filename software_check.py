@@ -2,36 +2,53 @@ import sys
 import subprocess
 import pkg_resources
 
-try:
-    import cv2
-except ImportError:
-    print("Error: cv2 not installed")
-
-# collects user versions
-pyVersion = sys.version[0:4]
-cvVersion = cv2.__version__[0:4]
-
 # constants
 # change according to version
-pythonCheck = "3.7."
-cvCheck = "4.1."
+pythonCheck = "3.7"
+cvCheck = "4.1"
 
-# check python version
-if(pyVersion != pythonCheck):
-        print("Error: using Python ", pyVersion)
-        print("Install Python ", pythonCheck)
+def Python_Check():
+    # check python version
+    if(pyVersion != pythonCheck):
+            print("Error: using Python ", pyVersion)
+            print("Install Python ", pythonCheck)
+            return False
+    return True
 
-# check OpenCV version
-if(cvVersion != cvCheck):
-    print("Error: using OpenCV ", cvVersion)
-    print("Install OpenCV ", cvCheck)
+def CV_Check():
+    # check OpenCV version
+    if(cvVersion != cvCheck):
+        print("Error: using OpenCV ", cvVersion)
+        print("Install OpenCV ", cvCheck)
+        return False
+    return True
 
-# check for libraries
-required = {'matplotlib', 'numpy'}
-installed = {pkg.key for pkg in pkg_resources.working_set}
-missing = required - installed
+def Library_Check():
+    # check for libraries
+    required = {'matplotlib', 'numpy'}
+    installed = {pkg.key for pkg in pkg_resources.working_set}
+    missing = required - installed
 
-if missing:
-    print("Error: missing modules ", missing)
+    if missing:
+        print("Error: missing modules ", missing)
+        return False
 
-exit()
+    return True
+
+def main():
+    if(Python_Check()):
+        if(CV_Check()):
+            if(Library_Check()):
+                print("Software Check: Passed")
+
+if __name__ == "__main__":
+    try:
+        import cv2
+        cvVersion = cv2.__version__[0:3]
+    except ImportError:
+        print("Error: cv2 not installed")
+
+    # collects user versions
+    pyVersion = sys.version[0:3]
+
+    main()
