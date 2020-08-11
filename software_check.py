@@ -1,5 +1,4 @@
 import sys
-import subprocess
 import pkg_resources
 
 # constants
@@ -7,13 +6,15 @@ import pkg_resources
 pythonCheck = "3.7"
 cvCheck = "4.1"
 
+
 def Python_Check():
     # check python version
     if(pyVersion != pythonCheck):
-            print("Error: using Python ", pyVersion)
-            print("Install Python ", pythonCheck)
-            return False
+        print("Error: using Python ", pyVersion)
+        print("Install Python ", pythonCheck)
+        return False
     return True
+
 
 def CV_Check():
     # check OpenCV version
@@ -22,6 +23,7 @@ def CV_Check():
         print("Install OpenCV ", cvCheck)
         return False
     return True
+
 
 def Library_Check():
     # check for libraries
@@ -35,11 +37,13 @@ def Library_Check():
 
     return True
 
+
 def main():
     if(Python_Check()):
         if(CV_Check()):
             if(Library_Check()):
                 print("Software Check: Passed")
+
 
 if __name__ == "__main__":
     try:
