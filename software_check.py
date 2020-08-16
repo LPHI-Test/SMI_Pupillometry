@@ -1,27 +1,35 @@
+"""
+Intended for use by new collaborators
+Checks that OpenCV, Python, and needed libraries are installed
+Checks that OpenCV and Python versions are compatible with this project
+"""
 import sys
 import pkg_resources
 
 # constants
 # change according to version
-pythonCheck = "3.7"
-cvCheck = "4.1"
+PYTHON_CHECK = "3.7"
+CV_CHECK = "4.1"
 
 
-def Python_Check():
+def python_check():
+    """checks if user's python version is compatible with project"""
     # check python version
-    if(pyVersion != pythonCheck):
+    if PY_VERSION != PYTHON_CHECK:
         return False
     return True
 
 
-def CV_Check():
+def cv_check():
+    """checks if user's OpenCV version is compatible with project"""
     # check OpenCV version
-    if(cvVersion != cvCheck):
+    if cvVersion != CV_CHECK:
         return False
     return True
 
 
-def Library_Check():
+def library_check():
+    """checks if necessary libraries are installed"""
     # check for libraries
     required = {'matplotlib', 'numpy'}
     installed = {pkg.key for pkg in pkg_resources.working_set}
@@ -32,41 +40,43 @@ def Library_Check():
 
     return True
 
-def notLibCheck():
+def not_lib_check():
+    """prints missing libraries"""
     required = {'matplotlib', 'numpy'}
     installed = {pkg.key for pkg in pkg_resources.working_set}
     missing = required - installed
     print("Error: missing modules ", missing)
 
 def main():
-    if(Python_Check() and CV_Check() and Library_Check()):
+    """if python and OpenCV are installed, checks versions and libraries"""
+    if python_check() and cv_check() and library_check():
         print("Software Check: Passed")
     else:
-        if(not Python_Check()):
-            print("Error: using Python ", pyVersion)
-            print("Install Python ", pythonCheck)
-        if(not CV_Check()):
+        if not python_check():
+            print("Error: using Python ", PY_VERSION)
+            print("Install Python ", PYTHON_CHECK)
+        if not cv_check():
             print("Error: using OpenCV ", cvVersion)
-            print("Install OpenCV ", cvCheck)
-        if(not Library_Check()):
-            notLibCheck()
+            print("Install OpenCV ", CV_CHECK)
+        if not library_check():
+            not_lib_check()
 
 
 if __name__ == "__main__":
 
     # collects user versions
-    pyVersion = sys.version[0:3]
+    PY_VERSION = sys.version[0:3]
 
     try:
         import cv2
         cvVersion = cv2.__version__[0:3]
     except ImportError:
         print("Error: cv2 not installed")
-        if(not Python_Check()):
-            print("Error: using Python ", pyVersion)
-            print("Install Python ", pythonCheck)
-        if(not Library_Check()):
-            notLibCheck()
-        exit()
+        if not python_check():
+            print("Error: using Python ", PY_VERSION)
+            print("Install Python ", PYTHON_CHECK)
+        if not library_check():
+            not_lib_check()
+        sys.exit()
 
     main()
