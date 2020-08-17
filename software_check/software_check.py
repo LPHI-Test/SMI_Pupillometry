@@ -63,8 +63,13 @@ def main():
 
 
 if __name__ == "__main__":
+    try:
+        import sys
+    except ImportError:
+        print("Error: python not installed")
+        sys.exit()
 
-    # collects user versions
+    # collects user version
     PY_VERSION = sys.version[0:3]
 
     try:
