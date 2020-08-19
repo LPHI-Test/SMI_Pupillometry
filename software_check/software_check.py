@@ -3,7 +3,6 @@ Intended for use by new collaborators
 Checks that OpenCV, Python, and needed libraries are installed
 Checks that OpenCV and Python versions are compatible with this project
 """
-import sys
 import pkg_resources
 
 # constants
@@ -32,7 +31,8 @@ def library_check():
     """checks if necessary libraries are installed"""
     # check for libraries
     required = {'matplotlib', 'numpy'}
-    installed = {pkg.key for pkg in pkg_resources.working_set}
+    pkgs = iter(pkg_resources.working_set)
+    installed = {pkg.key for pkg in pkgs}
     missing = required - installed
 
     if missing:
@@ -43,7 +43,8 @@ def library_check():
 def not_lib_check():
     """prints missing libraries"""
     required = {'matplotlib', 'numpy'}
-    installed = {pkg.key for pkg in pkg_resources.working_set}
+    pkgs = iter(pkg_resources.working_set)
+    installed = {pkg.key for pkg in pkgs}
     missing = required - installed
     print("Error: missing modules ", missing)
 
@@ -71,7 +72,6 @@ if __name__ == "__main__":
 
     # collects user version
     PY_VERSION = sys.version[0:3]
-
     try:
         import cv2
         cvVersion = cv2.__version__[0:3]

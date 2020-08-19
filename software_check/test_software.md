@@ -38,6 +38,7 @@ exit()
 1. Start new virtual environment session
 2. Install virtualenv (see line 7-8)
 3. virtualenv --python=/usr/bin/python<version_number> environment_name
+  - May need: python -m virtualenv ...
 4. source environment_name/bin/activate
 
 ### Shell Commands to Change OpenCV Version
