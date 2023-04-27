@@ -3,3 +3,5 @@ __pycache__/
 *.py[cod]
 *$py.class
 __pycache__/find_pupil.cpython-37.pyc
+*.pyc
+__pycache__/find_pupil.cpython-37.pyc
